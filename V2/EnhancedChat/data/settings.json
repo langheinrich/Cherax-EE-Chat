@@ -1,0 +1,10 @@
+{
+  "notifyNewMessages": true,
+  "notifyUserJoin": true,
+  "notifyUserDisconnect": true,
+  "autoScroll": true,
+  "showUserList": true,
+  "toastDuration": 10000,
+  "enableSound": true,
+  "toggleHotkey": 120
+}
