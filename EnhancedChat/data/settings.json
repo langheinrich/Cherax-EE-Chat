@@ -1,0 +1,8 @@
+{
+  "notifyNewMessages": true,
+  "notifyUserJoin": true,
+  "notifyUserDisconnect": true,
+  "notifyBroadcast": true,
+  "toastDuration": 5021,
+  "enableSound": true
+}

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Chat - Broadcast Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .sessions {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .sessions h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .session-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .session-item {
+            background: #f5f5f5;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .session-item .id {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .session-item .count {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .refresh-btn {
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📢 Broadcast Panel</h1>
+            <p>Send messages to all active sessions</p>
+        </div>
+        
+        <div class="content">
+            <form id="broadcastForm">
+                <div class="form-group">
+                    <label for="sender">Sender Name</label>
+                    <input 
+                        type="text" 
+                        id="sender" 
+                        placeholder="Server / Admin / System"
+                        value="Server"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message *</label>
+                    <textarea 
+                        id="message" 
+                        placeholder="Enter your broadcast message..."
+                        required
+                    ></textarea>
+                </div>
+
+                <button type="submit" class="btn" id="sendBtn">
+                    Send Broadcast
+                </button>
+
+                <div class="status" id="status"></div>
+            </form>
+
+            <div class="sessions">
+                <h3>Active Sessions (<span id="sessionCount">0</span>)</h3>
+                <div class="session-list" id="sessionList">
+                    <p style="color: #999; font-size: 13px;">Loading...</p>
+                </div>
+                <button class="refresh-btn" onclick="loadSessions()">🔄 Refresh</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        const form = document.getElementById('broadcastForm');
+        const statusEl = document.getElementById('status');
+        const sendBtn = document.getElementById('sendBtn');
+        const senderInput = document.getElementById('sender');
+        const messageInput = document.getElementById('message');
+        const sessionList = document.getElementById('sessionList');
+        const sessionCount = document.getElementById('sessionCount');
+
+        function showStatus(message, type) {
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        async function loadSessions() {
+            try {
+                const response = await fetch(`${API_URL}/api/sessions`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    sessionCount.textContent = data.count;
+                    
+                    if (data.sessions.length === 0) {
+                        sessionList.innerHTML = '<p style="color: #999; font-size: 13px;">No active sessions</p>';
+                    } else {
+                        sessionList.innerHTML = data.sessions.map(session => `
+                            <div class="session-item">
+                                <span class="id">${session.sessionId}</span>
+                                <span class="count">${session.messageCount} msgs</span>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                sessionList.innerHTML = '<p style="color: #e74c3c; font-size: 13px;">Failed to load sessions</p>';
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const sender = senderInput.value.trim() || 'Server';
+            const message = messageInput.value.trim();
+            
+            if (!message) {
+                showStatus('Please enter a message', 'error');
+                return;
+            }
+            
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/chat/broadcast`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sender: sender,
+                        message: message
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus(`✅ Broadcast sent to ${data.recipientCount} session(s)`, 'success');
+                    messageInput.value = '';
+                    loadSessions();
+                } else {
+                    showStatus('❌ Failed to send broadcast', 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Connection error: ' + error.message, 'error');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send Broadcast';
+            }
+        });
+
+        // Load sessions on page load
+        loadSessions();
+        
+        // Auto-refresh sessions every 10 seconds
+        setInterval(loadSessions, 10000);
+    </script>
+</body>
+</html>
